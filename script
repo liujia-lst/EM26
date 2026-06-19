@@ -1,0 +1,78 @@
+// Remove the 'PennController.' prefix for cleaner code
+PennController.ResetPrefix(null); 
+
+// Preload audio files so they don't buffer during the experiment
+//PreloadZip("https://your-audio-hosting-link.zip"); 
+
+// 1. Define the flow of the experiment
+Sequence("welcome", randomize("experiment_trials"), "send_results", "completion");
+
+// 2. Welcome/Instructions Screen
+newTrial("welcome",
+    defaultText.css("font-size", "1.2em").print(),
+    newText("Welcome to the experiment!").bold().center(),
+    newText("instructions", "You will listen to a short audio clip. Immediately after, you will answer a question by pressing <b>F</b> or <b>J</b> on your keyboard.")
+        .center()
+        .css("margin-top", "20px"),
+    newText("Press the spacebar to begin.")
+        .center()
+        .css("margin-top", "40px"),
+    newKey("start", " ").wait()
+);
+
+//first 5 will be practice, 
+
+// 3. The Main Experiment Template
+// This loops through 'stimuli.csv' and generates a trial for each row in the participant's assigned Group
+Template("stimuli.csv", row =>
+    newTrial("experiment_trials",
+        
+        // Step A: Play the audio stimulus
+        newAudio("stimulus", row.AudioFile)
+            .play()
+            .wait(), // The script pauses here until the audio finishes
+
+        // Step B: Show the comprehension question
+        newText("question", row.Question)
+            .center()
+            .css({"font-size": "1.5em", "margin-bottom": "30px"})
+            .print(),
+
+        // Step C: Show the two options side-by-side
+        newText("optF", "Press F: " + row.OptionF).bold(),
+        newText("optJ", "Press J: " + row.OptionJ).bold(),
+        
+        newCanvas("options_canvas", 400, 100)
+            .add(  0, 0, getText("optF") )
+            .add(300, 0, getText("optJ") )
+            .center()
+            .print(),
+
+        // Step D: Wait for user input (F or J)
+        newKey("response", "FJ")
+            .log() // Logs which key was pressed and the timestamp
+            .wait(),
+
+        // Optional Step E: A brief pause (Inter-Trial Interval) before the next audio starts
+        newTimer("ITI", 500)
+            .start()
+            .wait()
+    )
+    // Log trial-specific metadata to your final results file
+    .log("Item", row.Item)
+    .log("Condition", row.Condition)
+    .log("Group", row.Group)
+    .log("CorrectAnswer", row.TargetKey)
+);
+
+// 4. Send the data to the server
+SendResults("send_results");
+
+// 5. Completion Screen (prevents them from looping or exiting early)
+newTrial("completion",
+    newText("Thank you for your participation! You may now close this window.")
+        .center()
+        .print(),
+    // An empty button that is never clicked keeps the screen frozen here
+    newButton("void").wait()
+);
