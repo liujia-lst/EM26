@@ -1,78 +1,239 @@
-// Remove the 'PennController.' prefix for cleaner code
-PennController.ResetPrefix(null); 
+// Remove the "PennController." prefix for cleaner code
+PennController.ResetPrefix(null);
 
-// Preload audio files so they don't buffer during the experiment
-//PreloadZip("https://your-audio-hosting-link.zip"); 
+// Preload audio files if needed
+// PreloadZip("https://your-audio-hosting-link.zip");
 
-// 1. Define the flow of the experiment
-Sequence("welcome", randomize("experiment_trials"), "send_results", "completion");
 
-// 2. Welcome/Instructions Screen
-newTrial("welcome",
-    defaultText.css("font-size", "1.2em").print(),
-    newText("Welcome to the experiment!").bold().center(),
-    newText("instructions", "You will listen to a short audio clip. Immediately after, you will answer a question by pressing <b>F</b> or <b>J</b> on your keyboard.")
-        .center()
-        .css("margin-top", "20px"),
-    newText("Press the spacebar to begin.")
-        .center()
-        .css("margin-top", "40px"),
-    newKey("start", " ").wait()
+// 1. Define the experiment sequence
+Sequence(
+    "welcome",
+    randomize("experiment_trials"),
+    "send_results",
+    "completion"
 );
 
-//first 5 will be practice, 
 
-// 3. The Main Experiment Template
-// This loops through 'stimuli.csv' and generates a trial for each row in the participant's assigned Group
+// 2. Welcome / Instructions Screen
+newTrial("welcome",
+
+    newText("welcome_title", "Welcome to the experiment!")
+        .bold()
+        .center()
+        .css({
+            "font-size": "2.4em",
+            "margin-bottom": "35px",
+            "text-align": "center"
+        })
+        .print(),
+
+    newText(
+        "instructions",
+        "You will listen to a short audio clip. Immediately after, you will answer a question by pressing <b>F</b> or <b>J</b> on your keyboard."
+    )
+        .center()
+        .css({
+            "font-size": "1.6em",
+            "line-height": "1.6",
+            "max-width": "900px",
+            "text-align": "center",
+            "margin": "0 auto"
+        })
+        .print(),
+
+    newText("start_instruction", "Press the spacebar to begin.")
+        .center()
+        .css({
+            "font-size": "1.6em",
+            "margin-top": "50px",
+            "text-align": "center"
+        })
+        .print(),
+
+    newKey("start", " ")
+        .wait()
+);
+
+
+// 3. Main Experiment Trials
 Template("stimuli.csv", row =>
+
     newTrial("experiment_trials",
-        
+
         // Step A: Play the audio stimulus
         newAudio("stimulus", row.AudioFile)
             .play()
-            .wait(), // The script pauses here until the audio finishes
-
-        // Step B: Show the comprehension question
-        newText("question", row.Question)
-            .center()
-            .css({"font-size": "1.5em", "margin-bottom": "30px"})
-            .print(),
-
-        // Step C: Show the two options side-by-side
-        newText("optF", "Press F: " + row.OptionF).bold(),
-        newText("optJ", "Press J: " + row.OptionJ).bold(),
-        
-        newCanvas("options_canvas", 400, 100)
-            .add(  0, 0, getText("optF") )
-            .add(300, 0, getText("optJ") )
-            .center()
-            .print(),
-
-        // Step D: Wait for user input (F or J)
-        newKey("response", "FJ")
-            .log() // Logs which key was pressed and the timestamp
             .wait(),
 
-        // Optional Step E: A brief pause (Inter-Trial Interval) before the next audio starts
-        newTimer("ITI", 500)
-            .start()
+
+        // Step B: Display the comprehension question
+        newText("question", row.Question)
+            .center()
+            .css({
+                "font-size": "2em",
+                "font-weight": "bold",
+                "line-height": "1.5",
+                "max-width": "1000px",
+                "text-align": "center",
+                "margin": "0 auto 50px auto"
+            })
+            .print(),
+
+
+        // Step C: Create the F option
+        newText(
+            "optF",
+            "<div style='width:400px; text-align:center;'>" +
+
+                // Keyboard-style key
+                "<div style='" +
+                    "display:inline-flex;" +
+                    "align-items:center;" +
+                    "justify-content:center;" +
+                    "min-width:90px;" +
+                    "height:85px;" +
+                    "padding:0 15px;" +
+                    "box-sizing:border-box;" +
+                    "font-size:3em;" +
+                    "font-weight:900;" +
+                    "line-height:1;" +
+                    "color:#222;" +
+                    "background-color:#ffffff;" +
+                    "border:4px solid #333;" +
+                    "border-radius:12px;" +
+                    "box-shadow:0 7px 0 #333;" +
+                    "margin-bottom:35px;" +
+                "'>F</div>" +
+
+                // Answer text
+                "<div style='" +
+                    "font-size:1.6em;" +
+                    "font-weight:bold;" +
+                    "line-height:1.4;" +
+                "'>" +
+                    row.OptionF +
+                "</div>" +
+
+            "</div>"
+        )
+            .css({
+                "width": "400px",
+                "text-align": "center"
+            }),
+
+
+        // Step C: Create the J option
+        newText(
+            "optJ",
+            "<div style='width:400px; text-align:center;'>" +
+
+                // Keyboard-style key
+                "<div style='" +
+                    "display:inline-flex;" +
+                    "align-items:center;" +
+                    "justify-content:center;" +
+                    "min-width:90px;" +
+                    "height:85px;" +
+                    "padding:0 15px;" +
+                    "box-sizing:border-box;" +
+                    "font-size:3em;" +
+                    "font-weight:900;" +
+                    "line-height:1;" +
+                    "color:#222;" +
+                    "background-color:#ffffff;" +
+                    "border:4px solid #333;" +
+                    "border-radius:12px;" +
+                    "box-shadow:0 7px 0 #333;" +
+                    "margin-bottom:35px;" +
+                "'>J</div>" +
+
+                // Answer text
+                "<div style='" +
+                    "font-size:1.6em;" +
+                    "font-weight:bold;" +
+                    "line-height:1.4;" +
+                "'>" +
+                    row.OptionJ +
+                "</div>" +
+
+            "</div>"
+        )
+            .css({
+                "width": "400px",
+                "text-align": "center"
+            }),
+
+
+        // Place the two options side by side
+        newCanvas("options_canvas", 1000, 300)
+            .add(50, 0, getText("optF"))
+            .add(550, 0, getText("optJ"))
+            .center()
+            .print(),
+
+
+        // Step D: Wait for the participant to press F or J
+        newKey("response", "FJ")
+            .log()
+            .wait(),
+
+
+        // Remove the question and answer options
+        getText("question")
+            .remove(),
+
+        getCanvas("options_canvas")
+            .remove(),
+
+
+        // Step E: Rest / preparation screen
+        newText(
+            "next_instruction",
+            "When you are ready to listen to the next recording,<br><br>press the spacebar."
+        )
+            .center()
+            .css({
+                "font-size": "1.9em",
+                "font-weight": "bold",
+                "line-height": "1.5",
+                "text-align": "center",
+                "margin-top": "100px"
+            })
+            .print(),
+
+        newKey("continue", " ")
             .wait()
     )
-    // Log trial-specific metadata to your final results file
+
+    // Log trial information
     .log("Item", row.Item)
     .log("Condition", row.Condition)
     .log("Group", row.Group)
     .log("CorrectAnswer", row.TargetKey)
 );
 
-// 4. Send the data to the server
+
+// 4. Send the results to the server
 SendResults("send_results");
 
-// 5. Completion Screen (prevents them from looping or exiting early)
+
+// 5. Completion Screen
 newTrial("completion",
-    newText("Thank you for your participation! You may now close this window.")
+
+    newText(
+        "completion_message",
+        "Thank you for your participation!<br><br>You may now close this window."
+    )
         .center()
+        .css({
+            "font-size": "2em",
+            "font-weight": "bold",
+            "line-height": "1.5",
+            "text-align": "center",
+            "margin-top": "100px"
+        })
         .print(),
-    // An empty button that is never clicked keeps the screen frozen here
-    newButton("void").wait()
+
+    newButton("void")
+        .wait()
 );
