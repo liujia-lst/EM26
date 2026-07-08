@@ -1,0 +1,329 @@
+// Remove the "PennController." prefix for cleaner code
+PennController.ResetPrefix(null);
+
+// Preload audio files if needed
+// PreloadZip("https://your-audio-hosting-link.zip");
+
+// ===========================================================================
+// 1. MASTER SEQUENCE
+// Acts as the table of contents for the entire experiment.
+// ===========================================================================
+Sequence(
+    "welcome",
+    "consent",
+    "general_instructions",
+    randomize("practice_trials"),
+    "transition_to_main",
+    randomize("experiment_trials"),
+    "transition_to_proficiency",
+    randomize("proficiency_trials"),
+    "questionnaire",
+    "send_results",
+    "completion"
+);
+
+// ===========================================================================
+// 2. WELCOME SCREEN (1st Page)
+// ===========================================================================
+newTrial("welcome",
+    newText("welcome_title", "Welcome to the experiment!")
+        .bold()
+        .center()
+        .css({
+            "font-size": "2.4em",
+            "margin-bottom": "35px",
+            "text-align": "center"
+        })
+        .print(),
+
+    newText(
+        "instructions",
+        "You will listen to a short audio clip. Immediately after, you will answer a question by pressing <b>F</b> or <b>J</b> on your keyboard."
+    )
+        .center()
+        .css({
+            "font-size": "1.6em",
+            "line-height": "1.6",
+            "max-width": "900px",
+            "text-align": "center",
+            "margin": "0 auto"
+        })
+        .print(),
+
+    newText("start_instruction", "Press the spacebar to continue.")
+        .center()
+        .css({
+            "font-size": "1.6em",
+            "margin-top": "50px",
+            "text-align": "center"
+        })
+        .print(),
+
+    newKey("start", " ")
+        .wait()
+);
+
+// ===========================================================================
+// 3. CONSENT FORM (2nd Page)
+// ===========================================================================
+newTrial("consent",
+    newText("consent_title", "Participant Information & Consent Form").bold().css("font-size", "2em").center().print(),
+    
+    newText("purpose", "<br><b>1. Purpose of the Study</b><br>We are inviting you to participate in a reaction time study on language processing. The data collected from this experiment will be used exclusively for university course research and broader scientific purposes.")
+        .css({"font-size": "1.2em", "max-width": "800px", "margin": "0 auto"}).print(),
+
+    newText("procedure", "<br><b>2. Study Procedure</b><br>During this experiment, you will listen to short audio clips. Immediately after, you will answer a comprehension question by pressing F or J on your keyboard. We will record your key press and the time it takes you to respond. We will also collect basic demographic data, such as your age, mother tongue, overall German level, and gender.")
+        .css({"font-size": "1.2em", "max-width": "800px", "margin": "0 auto"}).print(),
+
+    newText("voluntary", "<br><b>3. Voluntary Participation & Right to Withdraw</b><br>Your participation is entirely voluntary. You may withdraw from the study at any moment without giving a reason and without suffering any disadvantages. If you choose to quit, you can simply close your browser window, and your incomplete data will not be used.")
+        .css({"font-size": "1.2em", "max-width": "800px", "margin": "0 auto"}).print(),
+
+    newText("privacy", "<br><b>4. Data Privacy & Anonymization</b><br>All data will be collected, stored, and processed completely anonymously. Your responses and demographic data cannot be linked to your personal identity.")
+        .css({"font-size": "1.2em", "max-width": "800px", "margin": "0 auto"}).print(),
+
+    newText("consent_prompt", "<br><b>Consent Declaration</b><br>By clicking the button below, you indicate that you have read the participant information, agree to participate, and consent to the anonymous collection and processing of your data.")
+        .css({"font-size": "1.2em", "max-width": "800px", "margin": "0 auto", "margin-bottom": "30px"}).print(),
+
+    // Using a button to act as the mandatory agreement to proceed
+    newButton("agree", "I Agree. Proceed to Instructions.")
+        .center()
+        .print()
+        .wait()
+);
+
+// ===========================================================================
+// 4. GENERAL INSTRUCTIONS (3rd Page)
+// ===========================================================================
+newTrial("general_instructions",
+    newText("instruction_title", "Structure of the Experiment")
+        .bold()
+        .center()
+        .css({"font-size": "2.4em", "margin-bottom": "35px"}).print(),
+
+    newText("order", "This experiment consists of four parts:<br><br><b>1. Practice Trials</b> (5 short rounds to get used to the controls)<br><b>2. Main Task</b> (The core auditory experiment)<br><b>3. Language Proficiency Test</b><br><b>4. A Brief Demographic Questionnaire</b><br><br>Whenever you are ready to begin the practice trials, click the button below.")
+        .center()
+        .css({"font-size": "1.6em", "line-height": "1.6", "max-width": "800px"}).print(),
+
+    newButton("start_practice", "Start Practice Trials")
+        .center()
+        .css("margin-top", "40px")
+        .print()
+        .wait()
+);
+
+// ===========================================================================
+// 5. PRACTICE TRIALS
+// Relies on practice.csv. Notice there are NO .log() commands at the end.
+// ===========================================================================
+Template("practice.csv", row =>
+    newTrial("practice_trials",
+        newAudio("practice_stimulus", row.AudioFile).play().wait(),
+
+        newText("practice_question", row.Question)
+            .center()
+            .css({"font-size": "2em", "font-weight": "bold", "margin": "0 auto 50px auto"})
+            .print(),
+
+        newText("p_optF", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>F</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionF + "</div></div>")
+            .css({"width": "400px", "text-align": "center"}),
+
+        newText("p_optJ", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>J</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionJ + "</div></div>")
+            .css({"width": "400px", "text-align": "center"}),
+
+        newCanvas("p_options_canvas", 1000, 300)
+            .add(50, 0, getText("p_optF"))
+            .add(550, 0, getText("p_optJ"))
+            .center()
+            .print(),
+
+        newKey("p_response", "FJ").wait(),
+
+        getText("practice_question").remove(),
+        getCanvas("p_options_canvas").remove(),
+
+        newText("p_next_instruction", "Practice round complete.<br><br>Press the spacebar for the next recording.")
+            .center().css({"font-size": "1.9em", "font-weight": "bold", "margin-top": "100px"}).print(),
+
+        newKey("p_continue", " ").wait()
+    )
+);
+
+// ===========================================================================
+// 6. TRANSITION TO MAIN TASK
+// ===========================================================================
+newTrial("transition_to_main",
+    newText("transition_text", "You have completed the practice phase!<br><br>The actual experiment will now begin. The controls remain exactly the same.")
+        .center()
+        .css({"font-size": "2em", "max-width": "800px", "margin-bottom": "40px"})
+        .print(),
+    
+    newButton("start_main", "Start Main Experiment")
+        .center()
+        .print()
+        .wait()
+);
+
+// ===========================================================================
+// 7. MAIN EXPERIMENT TRIALS
+// Relies on stimuli.csv. 
+// ===========================================================================
+Template("stimuli.csv", row =>
+    newTrial("experiment_trials",
+        newAudio("stimulus", row.AudioFile).play().wait(),
+
+        newText("question", row.Question)
+            .center()
+            .css({"font-size": "2em", "font-weight": "bold", "margin": "0 auto 50px auto"})
+            .print(),
+
+        newText("optF", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>F</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionF + "</div></div>")
+            .css({"width": "400px", "text-align": "center"}),
+
+        newText("optJ", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>J</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionJ + "</div></div>")
+            .css({"width": "400px", "text-align": "center"}),
+
+        newCanvas("options_canvas", 1000, 300)
+            .add(50, 0, getText("optF"))
+            .add(550, 0, getText("optJ"))
+            .center()
+            .print(),
+
+        newKey("response", "FJ")
+            .log()
+            .wait(),
+
+        getText("question").remove(),
+        getCanvas("options_canvas").remove(),
+
+        newText("next_instruction", "When you are ready to listen to the next recording,<br><br>press the spacebar.")
+            .center().css({"font-size": "1.9em", "font-weight": "bold", "margin-top": "100px"}).print(),
+
+        newKey("continue", " ").wait()
+    )
+    .log("Item", row.Item)
+    .log("Condition", row.Condition)
+    .log("Group", row.Group)
+    .log("CorrectAnswer", row.TargetKey)
+);
+
+// ===========================================================================
+// 8. TRANSITION TO PROFICIENCY TEST
+// ===========================================================================
+newTrial("transition_to_proficiency",
+    newText("prof_transition", "Main experiment complete!<br><br>Next, you will complete a short German proficiency task.")
+        .center()
+        .css({"font-size": "2em", "max-width": "800px", "margin-bottom": "40px"})
+        .print(),
+    
+    newButton("start_prof", "Start Proficiency Task")
+        .center()
+        .print()
+        .wait()
+);
+
+// ===========================================================================
+// 9. PROFICIENCY TEST
+// Relies on proficiency.csv. (Assumes a similar visual structure for reading/listening)
+// ===========================================================================
+Template("proficiency.csv", row =>
+    newTrial("proficiency_trials",
+        
+        // Example assumes it's a reading task, but you can add newAudio here if needed
+        newText("prof_question", row.Question)
+            .center()
+            .css({"font-size": "2em", "font-weight": "bold", "margin": "0 auto 50px auto"})
+            .print(),
+
+        newText("prof_optF", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>F</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionF + "</div></div>"),
+        newText("prof_optJ", "<div style='width:400px; text-align:center;'><div style='display:inline-flex;align-items:center;justify-content:center;min-width:90px;height:85px;padding:0 15px;font-size:3em;font-weight:900;color:#222;background-color:#ffffff;border:4px solid #333;border-radius:12px;box-shadow:0 7px 0 #333;margin-bottom:35px;'>J</div><div style='font-size:1.6em;font-weight:bold;line-height:1.4;'>" + row.OptionJ + "</div></div>"),
+
+        newCanvas("prof_options", 1000, 300)
+            .add(50, 0, getText("prof_optF"))
+            .add(550, 0, getText("prof_optJ"))
+            .center()
+            .print(),
+
+        newKey("prof_response", "FJ")
+            .log()
+            .wait(),
+            
+        getText("prof_question").remove(),
+        getCanvas("prof_options").remove(),
+        
+        newText("prof_next", "Press spacebar for the next question.").center().css("margin-top", "50px").print(),
+        newKey("prof_cont", " ").wait()
+    )
+    .log("Prof_Item", row.Item)
+    .log("Prof_Correct", row.TargetKey)
+);
+
+// ===========================================================================
+// 10. DEMOGRAPHIC QUESTIONNAIRE
+// ===========================================================================
+newTrial("questionnaire",
+    newText("q_title", "Final Step: Demographic Questionnaire").bold().center().css({"font-size": "2em", "margin-bottom": "30px"}).print(),
+
+    // Age
+    newText("age_label", "Age:").print(),
+    newTextInput("age").css("margin-bottom", "20px").print().log(),
+
+    // Gender
+    newText("gender_label", "Gender:").print(),
+    newDropDown("gender", "Select")
+        .add("Female", "Male", "Non-binary", "Prefer not to say")
+        .css("margin-bottom", "20px").print().log(),
+
+    // Mother Tongue
+    newText("l1_label", "Mother Tongue (L1):").print(),
+    newTextInput("mother_tongue").css("margin-bottom", "20px").print().log(),
+
+    // German Level
+    newText("l2_label", "Overall German Level:").print(),
+    newDropDown("german_level", "Select")
+        .add("Native", "A1", "A2", "B1", "B2", "C1", "C2")
+        .css("margin-bottom", "20px").print().log(),
+        
+    // Years of Formal Study 
+    newText("study_label", "How many years of formal German classes have you taken?").print(),
+    newTextInput("formal_study").css("margin-bottom", "20px").print().log(),
+
+    // Handedness (Crucial for RT keystroke data)
+    newText("hand_label", "Handedness:").print(),
+    newDropDown("handedness", "Select")
+        .add("Right-handed", "Left-handed", "Ambidextrous")
+        .css("margin-bottom", "20px").print().log(),
+
+    // Hearing (Crucial for auditory stimuli)
+    newText("hearing_label", "Do you have any known hearing loss or use hearing aids?").print(),
+    newDropDown("hearing", "Select")
+        .add("No", "Yes")
+        .css("margin-bottom", "30px").print().log(),
+
+    newButton("submit", "Submit Responses")
+        .center()
+        .print()
+        .wait()
+);
+
+// ===========================================================================
+// 11. SEND RESULTS & COMPLETION
+// ===========================================================================
+SendResults("send_results");
+
+newTrial("completion",
+    newText(
+        "completion_message",
+        "Thank you for your participation!<br><br>You may now close this window."
+    )
+        .center()
+        .css({
+            "font-size": "2em",
+            "font-weight": "bold",
+            "line-height": "1.5",
+            "text-align": "center",
+            "margin-top": "100px"
+        })
+        .print(),
+
+    newButton("void").wait()
+);
