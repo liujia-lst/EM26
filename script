@@ -1,73 +1,724 @@
-// Remove the "PennController." prefix for cleaner code
+// ============================================================
+// 0. GENERAL SETTINGS
+// ============================================================
+
+// Remove the "PennController." prefix
 PennController.ResetPrefix(null);
 
-// Preload audio files if needed
+// Uncomment only when the experiment is ready for data collection
+// DebugOff();
+
+// Optional: preload audio files from a ZIP archive
 // PreloadZip("https://your-audio-hosting-link.zip");
 
+// Replace XX with the actual duration of the experiment
+const EXPERIMENT_DURATION = "XX";
 
-// 1. Define the experiment sequence
+
+// ============================================================
+// 1. SHARED STYLES
+// ============================================================
+
+const titleStyle = {
+    "font-size": "2.4em",
+    "font-weight": "bold",
+    "margin-bottom": "35px",
+    "text-align": "center"
+};
+
+const bodyStyle = {
+    "font-size": "1.5em",
+    "line-height": "1.6",
+    "max-width": "950px",
+    "text-align": "left",
+    "margin": "0 auto"
+};
+
+const centeredBodyStyle = {
+    "font-size": "1.5em",
+    "line-height": "1.6",
+    "max-width": "950px",
+    "text-align": "center",
+    "margin": "0 auto"
+};
+
+const continueStyle = {
+    "font-size": "1.5em",
+    "line-height": "1.5",
+    "margin-top": "45px",
+    "text-align": "center"
+};
+
+const buttonStyle = {
+    "font-size": "1.2em",
+    "padding": "10px 25px",
+    "margin-top": "30px"
+};
+
+const formLabelStyle = {
+    "font-size": "1.35em",
+    "font-weight": "bold",
+    "line-height": "1.4",
+    "margin-top": "28px",
+    "margin-bottom": "10px",
+    "text-align": "center"
+};
+
+const dropDownStyle = {
+    "font-size": "1.15em",
+    "width": "400px",
+    "height": "42px",
+    "margin-bottom": "10px"
+};
+
+
+// ============================================================
+// 2. EXPERIMENT SEQUENCE
+// ============================================================
+
 Sequence(
+    "counter",
+
     "welcome",
+    "consent",
+    "general_information",
+
+    "questionnaire_intro",
+    "questionnaire",
+
+    "main_instructions",
+    "practice_instructions",
+    "practice_trials",
+    "after_practice",
+
     randomize("experiment_trials"),
+
+    "after_main",
+    randomize("proficiency_test"),
+
+    "prolific_id",
     "send_results",
     "completion"
 );
 
 
-// 2. Welcome / Instructions Screen
+// Assign participants successively to Groups A, B, C and D
+SetCounter("counter", "inc", 1);
+
+
+// ============================================================
+// 3. WELCOME PAGE
+// ============================================================
+
 newTrial("welcome",
 
-    newText("welcome_title", "Welcome to the experiment!")
-        .bold()
+    newText(
+        "welcome_title",
+        "Herzlich willkommen!"
+    )
         .center()
-        .css({
-            "font-size": "2.4em",
-            "margin-bottom": "35px",
-            "text-align": "center"
-        })
+        .css(titleStyle)
         .print(),
 
     newText(
-        "instructions",
-        "You will listen to a short audio clip. Immediately after, you will answer a question by pressing <b>F</b> or <b>J</b> on your keyboard."
+        "welcome_text",
+        `
+        Sehr geehrte Teilnehmerin, sehr geehrter Teilnehmer,
+        <br><br>
+        willkommen zu unserer Reaktionszeitstudie zur Sprachverarbeitung.
+        Dieses Experiment wird im Rahmen des Kurses
+        „Experimentelle Methoden in der psycholinguistischen Forschung – WS2026“
+        an der Universität des Saarlandes durchgeführt.
+        `
     )
         .center()
-        .css({
-            "font-size": "1.6em",
-            "line-height": "1.6",
-            "max-width": "900px",
-            "text-align": "center",
-            "margin": "0 auto"
-        })
+        .css(centeredBodyStyle)
         .print(),
 
-    newText("start_instruction", "Press the spacebar to begin.")
+    newText(
+        "welcome_continue",
+        "Drücken Sie die Leertaste, um fortzufahren."
+    )
         .center()
-        .css({
-            "font-size": "1.6em",
-            "margin-top": "50px",
-            "text-align": "center"
-        })
+        .css(continueStyle)
         .print(),
 
-    newKey("start", " ")
+    newKey("welcome_key", " ")
         .wait()
 );
 
 
-// 3. Main Experiment Trials
-Template("stimuli.csv", row =>
+// ============================================================
+// 4. CONSENT FORM
+// ============================================================
 
-    newTrial("experiment_trials",
+newTrial("consent",
 
-        // Step A: Play the audio stimulus
-        newAudio("stimulus", row.AudioFile)
+    newText(
+        "consent_title",
+        "Einverständniserklärung"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "consent_text",
+        `
+        Ich bin bereit, an einer Reaktionszeitstudie zur Sprachverarbeitung
+        teilzunehmen.
+        <br><br>
+        Ich wurde darüber informiert, dass ich den Versuch jederzeit ohne
+        Angabe von Gründen und ohne Nachteile abbrechen kann. Insbesondere
+        ist mir bewusst, dass meine Antworten gespeichert werden, wobei diese
+        aber nicht mit meinen persönlichen Daten in Verbindung gebracht
+        werden können.
+        <br><br>
+        Alle Daten werden anonym erhoben und weiterverarbeitet. Alle Daten
+        werden ausschließlich zu wissenschaftlichen Zwecken verwendet und
+        können zu wissenschaftlichen Zwecken an Dritte, beispielsweise an
+        Forschungseinrichtungen, weitergegeben werden.
+        <br><br>
+        Ich habe die Teilnehmerinformationen gelesen und erkläre hiermit
+        mein Einverständnis mit den oben genannten Bedingungen.
+        `
+    )
+        .center()
+        .css(bodyStyle)
+        .print(),
+
+    newScale(
+        "consent_checkbox",
+        "Ich habe die Teilnehmerinformationen gelesen und stimme der Teilnahme an der Studie zu."
+    )
+        .checkbox()
+        .labelsPosition("right")
+        .center()
+        .cssContainer({
+            "width": "900px",
+            "font-size": "1.2em",
+            "line-height": "1.5",
+            "margin-top": "30px"
+        })
+        .log("last")
+        .print(),
+
+    newText(
+        "consent_warning",
+        "Bitte bestätigen Sie Ihre Einwilligung, bevor Sie fortfahren."
+    )
+        .color("red")
+        .center()
+        .css({
+            "font-size": "1.1em",
+            "font-weight": "bold",
+            "margin-top": "20px"
+        })
+        .hidden()
+        .print(),
+
+    newButton(
+        "consent_continue",
+        "Weiter"
+    )
+        .center()
+        .css(buttonStyle)
+        .print()
+        .wait(
+            getScale("consent_checkbox")
+                .test.selected()
+                .failure(
+                    getText("consent_warning")
+                        .visible()
+                )
+        )
+);
+
+
+// ============================================================
+// 5. GENERAL INFORMATION
+// ============================================================
+
+newTrial("general_information",
+
+    newText(
+        "general_title",
+        "Informationen zum Experiment"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "general_text",
+        `
+        Dieses Experiment besteht aus drei Teilen: einem Fragebogen,
+        der Hauptaufgabe und einem Deutsch-Sprachtest.
+        <br><br>
+        Während der Studie werden Sie kurze Audioaufnahmen hören, und direkt
+        im Anschluss erscheint eine Verständnisfrage auf dem Bildschirm.
+        Sie können die Frage beantworten, indem Sie entweder die Taste
+        <b>F</b> oder <b>J</b> auf Ihrer Tastatur drücken.
+        <br><br>
+        Wir zeichnen Ihre Antwort und die dafür benötigte Zeit auf.
+        Bitte versuchen Sie, so schnell wie möglich zu antworten.
+        Durch Drücken der Leertaste gelangen Sie zur nächsten Frage.
+        <br><br>
+        Sie werden den Deutsch-Sprachtest nach der oben genannten
+        Hauptaufgabe absolvieren.
+        <br><br>
+        Wir werden auch einige demografische Daten wie Alter,
+        Muttersprache und Deutschniveau erfassen.
+        <br><br>
+        Die Teilnahme dauert etwa <b>${EXPERIMENT_DURATION} Minuten</b>.
+        `
+    )
+        .center()
+        .css(bodyStyle)
+        .print(),
+
+    newText(
+        "general_continue",
+        "Drücken Sie die Leertaste, um fortzufahren."
+    )
+        .center()
+        .css(continueStyle)
+        .print(),
+
+    newKey("general_key", " ")
+        .wait()
+);
+
+
+// ============================================================
+// 6. QUESTIONNAIRE INTRODUCTION
+// ============================================================
+
+newTrial("questionnaire_intro",
+
+    newText(
+        "questionnaire_intro_title",
+        "Fragebogen"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "questionnaire_intro_text",
+        "In diesem Fragebogen werden wir Sie nach einigen demografischen Daten fragen."
+    )
+        .center()
+        .css(centeredBodyStyle)
+        .print(),
+
+    newText(
+        "questionnaire_intro_continue",
+        "Drücken Sie die Leertaste, um mit dem Fragebogen zu beginnen."
+    )
+        .center()
+        .css(continueStyle)
+        .print(),
+
+    newKey("questionnaire_intro_key", " ")
+        .wait()
+);
+
+
+// ============================================================
+// 7. DEMOGRAPHIC QUESTIONNAIRE
+// ============================================================
+
+newTrial("questionnaire",
+
+    newText(
+        "questionnaire_title",
+        "Demografische Angaben"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "questionnaire_description",
+        "Bitte beantworten Sie die folgenden Fragen."
+    )
+        .center()
+        .css({
+            "font-size": "1.3em",
+            "margin-bottom": "30px",
+            "text-align": "center"
+        })
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 1. Age
+    // --------------------------------------------------------
+
+    newText(
+        "age_label",
+        "1. Wie alt sind Sie?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newTextInput("age", "")
+        .lines(1)
+        .size(400, 40)
+        .center()
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 2. Gender
+    // --------------------------------------------------------
+
+    newText(
+        "gender_label",
+        "2. Geschlecht:"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newDropDown(
+        "gender",
+        "Bitte auswählen"
+    )
+        .add(
+            "Weiblich",
+            "Männlich",
+            "Nicht-binär",
+            "Keine Angabe"
+        )
+        .center()
+        .css(dropDownStyle)
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 3. Mother tongue
+    // --------------------------------------------------------
+
+    newText(
+        "mother_tongue_label",
+        "3. Was ist Ihre Muttersprache?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newTextInput("mother_tongue", "")
+        .lines(1)
+        .size(400, 40)
+        .center()
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 4. German level
+    // --------------------------------------------------------
+
+    newText(
+        "german_level_label",
+        "4. Wie schätzen Sie Ihr allgemeines Deutschniveau ein?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newDropDown(
+        "german_level",
+        "Bitte auswählen"
+    )
+        .add(
+            "Deutsch als Muttersprache",
+            "A1",
+            "A2",
+            "B1",
+            "B2",
+            "C1",
+            "C2"
+        )
+        .center()
+        .css(dropDownStyle)
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 5. Years of formal German classes
+    // --------------------------------------------------------
+
+    newText(
+        "formal_study_label",
+        "5. Wie viele Jahre formalen Deutschunterricht hatten Sie?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newTextInput("formal_study", "")
+        .lines(1)
+        .size(400, 40)
+        .center()
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 6. Handedness
+    // --------------------------------------------------------
+
+    newText(
+        "handedness_label",
+        "6. Welche Hand ist Ihre dominante Hand?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newDropDown(
+        "handedness",
+        "Bitte auswählen"
+    )
+        .add(
+            "Rechtshändig",
+            "Linkshändig",
+            "Beidhändig"
+        )
+        .center()
+        .css(dropDownStyle)
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // 7. Hearing
+    // --------------------------------------------------------
+
+    newText(
+        "hearing_label",
+        "7. Haben Sie eine bekannte Hörbeeinträchtigung oder verwenden Sie ein Hörgerät?"
+    )
+        .center()
+        .css(formLabelStyle)
+        .print(),
+
+    newDropDown(
+        "hearing",
+        "Bitte auswählen"
+    )
+        .add(
+            "Nein",
+            "Ja"
+        )
+        .center()
+        .css(dropDownStyle)
+        .log()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // Warning
+    // --------------------------------------------------------
+
+    newText(
+        "questionnaire_warning",
+        "Bitte beantworten Sie alle Fragen, bevor Sie fortfahren."
+    )
+        .color("red")
+        .center()
+        .css({
+            "font-size": "1.1em",
+            "font-weight": "bold",
+            "margin-top": "25px"
+        })
+        .hidden()
+        .print(),
+
+
+    // --------------------------------------------------------
+    // Submit button
+    // --------------------------------------------------------
+
+    newButton(
+        "questionnaire_continue",
+        "Antworten absenden"
+    )
+        .center()
+        .css(buttonStyle)
+        .print()
+        .wait(
+            getTextInput("age")
+                .test.text(/\S+/)
+
+                .and(
+                    getDropDown("gender")
+                        .test.selected()
+                )
+
+                .and(
+                    getTextInput("mother_tongue")
+                        .test.text(/\S+/)
+                )
+
+                .and(
+                    getDropDown("german_level")
+                        .test.selected()
+                )
+
+                .and(
+                    getTextInput("formal_study")
+                        .test.text(/\S+/)
+                )
+
+                .and(
+                    getDropDown("handedness")
+                        .test.selected()
+                )
+
+                .and(
+                    getDropDown("hearing")
+                        .test.selected()
+                )
+
+                .failure(
+                    getText("questionnaire_warning")
+                        .visible()
+                )
+        )
+);
+
+
+// ============================================================
+// 8. MAIN-TASK INSTRUCTIONS
+// ============================================================
+
+newTrial("main_instructions",
+
+    newText(
+        "main_instructions_title",
+        "Hauptaufgabe"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "main_instructions_text",
+        `
+        Vielen Dank für das Beantworten der Fragen. Nun fahren wir mit
+        dem zweiten Teil fort, der Hauptaufgabe.
+        <br><br>
+        Ihre Aufgabe ist es, sich die Audioaufnahme anzuhören und die
+        Frage so schnell wie möglich zu beantworten. Zuerst hören Sie
+        eine kurze Audioaufnahme. Direkt im Anschluss erscheint eine
+        Verständnisfrage mit zwei Antwortmöglichkeiten auf dem Bildschirm.
+        <br><br>
+        Sie können die Frage beantworten, indem Sie entweder
+        <b>F</b> oder <b>J</b> auf der Tastatur drücken. Ihre Antwort
+        sowie die Antwortzeit werden aufgezeichnet. Durch Drücken der
+        Leertaste gelangen Sie zur nächsten Frage.
+        <br><br>
+        Da es sich um ein Hörexperiment handelt, stellen Sie bitte sicher,
+        dass Ihre Umgebung ruhig ist und Sie den Ton gut hören können.
+        `
+    )
+        .center()
+        .css(bodyStyle)
+        .print(),
+
+    newText(
+        "main_instructions_continue",
+        "Drücken Sie die Leertaste, um zur nächsten Seite zu gelangen."
+    )
+        .center()
+        .css(continueStyle)
+        .print(),
+
+    newKey("main_instructions_key", " ")
+        .wait()
+);
+
+
+// ============================================================
+// 9. PRACTICE INSTRUCTIONS
+// ============================================================
+
+newTrial("practice_instructions",
+
+    newText(
+        "practice_title",
+        "Übungsteil"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "practice_text",
+        `
+        Die ersten 5 Aufgaben dienen der Übung. Sie sehen genau dasselbe
+        Format wie bei den eigentlichen Aufgaben.
+        <br><br>
+        Sie hören eine Audioaufnahme, eine Frage erscheint auf dem
+        Bildschirm, und Sie können diese durch Drücken von
+        <b>F</b> oder <b>J</b> beantworten.
+        <br><br>
+        Denken Sie daran, so schnell wie möglich zu antworten.
+        `
+    )
+        .center()
+        .css(bodyStyle)
+        .print(),
+
+    newText(
+        "practice_continue",
+        "Drücken Sie die Leertaste, um mit dem Übungsteil zu beginnen."
+    )
+        .center()
+        .css(continueStyle)
+        .print(),
+
+    newKey("practice_start_key", " ")
+        .wait()
+);
+
+
+// ============================================================
+// 10. SHARED LISTENING-TRIAL FUNCTION
+// ============================================================
+
+function createListeningTrial(trialLabel, row) {
+
+    return newTrial(trialLabel,
+
+        // ----------------------------------------------------
+        // Play audio
+        // ----------------------------------------------------
+
+        newAudio(
+            "stimulus",
+            row.AudioFile
+        )
             .play()
             .wait(),
 
 
-        // Step B: Display the comprehension question
-        newText("question", row.Question)
+        // ----------------------------------------------------
+        // Comprehension question
+        // ----------------------------------------------------
+
+        newText(
+            "question",
+            row.Question
+        )
             .center()
             .css({
                 "font-size": "2em",
@@ -80,41 +731,46 @@ Template("stimuli.csv", row =>
             .print(),
 
 
-        // Step C: Create the F option
+        // ----------------------------------------------------
+        // F option
+        // ----------------------------------------------------
+
         newText(
             "optF",
-            "<div style='width:400px; text-align:center;'>" +
+            `
+            <div style="width:400px; text-align:center;">
 
-                // Keyboard-style key
-                "<div style='" +
-                    "display:inline-flex;" +
-                    "align-items:center;" +
-                    "justify-content:center;" +
-                    "min-width:90px;" +
-                    "height:85px;" +
-                    "padding:0 15px;" +
-                    "box-sizing:border-box;" +
-                    "font-size:3em;" +
-                    "font-weight:900;" +
-                    "line-height:1;" +
-                    "color:#222;" +
-                    "background-color:#ffffff;" +
-                    "border:4px solid #333;" +
-                    "border-radius:12px;" +
-                    "box-shadow:0 7px 0 #333;" +
-                    "margin-bottom:35px;" +
-                "'>F</div>" +
+                <div style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    min-width:90px;
+                    height:85px;
+                    padding:0 15px;
+                    box-sizing:border-box;
+                    font-size:3em;
+                    font-weight:900;
+                    line-height:1;
+                    color:#222;
+                    background-color:#ffffff;
+                    border:4px solid #333;
+                    border-radius:12px;
+                    box-shadow:0 7px 0 #333;
+                    margin-bottom:35px;
+                ">
+                    F
+                </div>
 
-                // Answer text
-                "<div style='" +
-                    "font-size:1.6em;" +
-                    "font-weight:bold;" +
-                    "line-height:1.4;" +
-                "'>" +
-                    row.OptionF +
-                "</div>" +
+                <div style="
+                    font-size:1.6em;
+                    font-weight:bold;
+                    line-height:1.4;
+                ">
+                    ${row.OptionF}
+                </div>
 
-            "</div>"
+            </div>
+            `
         )
             .css({
                 "width": "400px",
@@ -122,41 +778,46 @@ Template("stimuli.csv", row =>
             }),
 
 
-        // Step C: Create the J option
+        // ----------------------------------------------------
+        // J option
+        // ----------------------------------------------------
+
         newText(
             "optJ",
-            "<div style='width:400px; text-align:center;'>" +
+            `
+            <div style="width:400px; text-align:center;">
 
-                // Keyboard-style key
-                "<div style='" +
-                    "display:inline-flex;" +
-                    "align-items:center;" +
-                    "justify-content:center;" +
-                    "min-width:90px;" +
-                    "height:85px;" +
-                    "padding:0 15px;" +
-                    "box-sizing:border-box;" +
-                    "font-size:3em;" +
-                    "font-weight:900;" +
-                    "line-height:1;" +
-                    "color:#222;" +
-                    "background-color:#ffffff;" +
-                    "border:4px solid #333;" +
-                    "border-radius:12px;" +
-                    "box-shadow:0 7px 0 #333;" +
-                    "margin-bottom:35px;" +
-                "'>J</div>" +
+                <div style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    min-width:90px;
+                    height:85px;
+                    padding:0 15px;
+                    box-sizing:border-box;
+                    font-size:3em;
+                    font-weight:900;
+                    line-height:1;
+                    color:#222;
+                    background-color:#ffffff;
+                    border:4px solid #333;
+                    border-radius:12px;
+                    box-shadow:0 7px 0 #333;
+                    margin-bottom:35px;
+                ">
+                    J
+                </div>
 
-                // Answer text
-                "<div style='" +
-                    "font-size:1.6em;" +
-                    "font-weight:bold;" +
-                    "line-height:1.4;" +
-                "'>" +
-                    row.OptionJ +
-                "</div>" +
+                <div style="
+                    font-size:1.6em;
+                    font-weight:bold;
+                    line-height:1.4;
+                ">
+                    ${row.OptionJ}
+                </div>
 
-            "</div>"
+            </div>
+            `
         )
             .css({
                 "width": "400px",
@@ -164,21 +825,42 @@ Template("stimuli.csv", row =>
             }),
 
 
-        // Place the two options side by side
-        newCanvas("options_canvas", 1000, 300)
-            .add(50, 0, getText("optF"))
-            .add(550, 0, getText("optJ"))
+        // ----------------------------------------------------
+        // Display F and J side by side
+        // ----------------------------------------------------
+
+        newCanvas(
+            "options_canvas",
+            1000,
+            300
+        )
+            .add(
+                50,
+                0,
+                getText("optF")
+            )
+            .add(
+                550,
+                0,
+                getText("optJ")
+            )
             .center()
             .print(),
 
 
-        // Step D: Wait for the participant to press F or J
-        newKey("response", "FJ")
-            .log()
+        // ----------------------------------------------------
+        // Record response
+        // ----------------------------------------------------
+
+        newKey(
+            "response",
+            "FJ"
+        )
+            .log("last")
             .wait(),
 
 
-        // Remove the question and answer options
+        // Remove question and options
         getText("question")
             .remove(),
 
@@ -186,10 +868,17 @@ Template("stimuli.csv", row =>
             .remove(),
 
 
-        // Step E: Rest / preparation screen
+        // ----------------------------------------------------
+        // Preparation screen
+        // ----------------------------------------------------
+
         newText(
             "next_instruction",
-            "When you are ready to listen to the next recording,<br><br>press the spacebar."
+            `
+            Wenn Sie bereit sind, die nächste Aufnahme anzuhören,
+            <br><br>
+            drücken Sie die Leertaste.
+            `
         )
             .center()
             .css({
@@ -201,39 +890,419 @@ Template("stimuli.csv", row =>
             })
             .print(),
 
-        newKey("continue", " ")
+        newKey(
+            "continue",
+            " "
+        )
             .wait()
     )
 
-    // Log trial information
+    // Trial information saved in the results
     .log("Item", row.Item)
     .log("Condition", row.Condition)
     .log("Group", row.Group)
-    .log("CorrectAnswer", row.TargetKey)
+    .log("AudioFile", row.AudioFile)
+    .log("Question", row.Question)
+    .log("OptionF", row.OptionF)
+    .log("OptionJ", row.OptionJ)
+    .log("CorrectAnswer", row.TargetKey);
+}
+
+
+// ============================================================
+// 11. PRACTICE TRIALS
+// ============================================================
+
+// practice.csv columns:
+//
+// Group
+// Item
+// Condition
+// AudioFile
+// Question
+// OptionF
+// OptionJ
+// TargetKey
+
+Template(
+    GetTable("practice.csv")
+        .setGroupColumn("Group"),
+
+    row => createListeningTrial(
+        "practice_trials",
+        row
+    )
 );
 
 
-// 4. Send the results to the server
+// ============================================================
+// 12. AFTER PRACTICE
+// ============================================================
+
+newTrial("after_practice",
+
+    newText(
+        "after_practice_title",
+        "Ende des Übungsteils"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "after_practice_text",
+        `
+        Damit ist der Übungsteil des Experiments abgeschlossen.
+        Nun beginnt der Hauptteil.
+        <br><br>
+        Sobald Sie die Leertaste drücken, startet das Audio.
+        Wenn Sie bereit sind, drücken Sie die Leertaste.
+        `
+    )
+        .center()
+        .css(centeredBodyStyle)
+        .print(),
+
+    newKey(
+        "after_practice_key",
+        " "
+    )
+        .wait()
+);
+
+
+// ============================================================
+// 13. MAIN EXPERIMENT TRIALS
+// ============================================================
+
+// stimuli.csv must contain:
+//
+// Group
+// Item
+// Condition
+// AudioFile
+// Question
+// OptionF
+// OptionJ
+// TargetKey
+
+Template(
+    GetTable("stimuli.csv")
+        .setGroupColumn("Group"),
+
+    row => createListeningTrial(
+        "experiment_trials",
+        row
+    )
+);
+
+
+// ============================================================
+// 14. AFTER MAIN TASK
+// ============================================================
+
+newTrial("after_main",
+
+    newText(
+        "after_main_title",
+        "Hauptteil abgeschlossen"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "after_main_text",
+        `
+        Vielen Dank. Der Hauptteil ist abgeschlossen.
+        <br><br>
+        Zuletzt werden Sie einen Deutsch-Sprachtest absolvieren.
+        Wählen Sie für jede der folgenden Fragen die passendste Option aus.
+        `
+    )
+        .center()
+        .css(centeredBodyStyle)
+        .print(),
+
+    newText(
+        "after_main_continue",
+        "Drücken Sie die Leertaste, um mit dem Deutsch-Sprachtest zu beginnen."
+    )
+        .center()
+        .css(continueStyle)
+        .print(),
+
+    newKey(
+        "after_main_key",
+        " "
+    )
+        .wait()
+);
+
+
+// ============================================================
+// 15. GERMAN PROFICIENCY TEST
+// ============================================================
+
+// proficiency.csv columns:
+//
+// Question
+// A
+// B
+// C
+// D
+// Correct answer
+// Level
+
+Template(
+    "proficiency.csv",
+
+    row => {
+
+        // Determine the letter of the correct answer
+        const correctKey =
+            row.A === row["Correct answer"] ? "A" :
+            row.B === row["Correct answer"] ? "B" :
+            row.C === row["Correct answer"] ? "C" :
+            row.D === row["Correct answer"] ? "D" :
+            "NA";
+
+        return newTrial("proficiency_test",
+
+            // ------------------------------------------------
+            // Question
+            // ------------------------------------------------
+
+            newText(
+                "proficiency_question",
+                row.Question
+            )
+                .center()
+                .css({
+                    "font-size": "1.8em",
+                    "font-weight": "bold",
+                    "line-height": "1.5",
+                    "max-width": "950px",
+                    "text-align": "center",
+                    "margin": "40px auto 45px auto"
+                })
+                .print(),
+
+
+            // ------------------------------------------------
+            // Answers A, B, C, D
+            // ------------------------------------------------
+
+            newScale(
+                "proficiency_answer",
+                "A",
+                "B",
+                "C",
+                "D"
+            )
+                .label(
+                    0,
+                    newText(
+                        "answer_A",
+                        `<span style="font-size:1.15em;"><b>A.</b>&nbsp;&nbsp;${row.A}</span>`
+                    )
+                )
+
+                .label(
+                    1,
+                    newText(
+                        "answer_B",
+                        `<span style="font-size:1.15em;"><b>B.</b>&nbsp;&nbsp;${row.B}</span>`
+                    )
+                )
+
+                .label(
+                    2,
+                    newText(
+                        "answer_C",
+                        `<span style="font-size:1.15em;"><b>C.</b>&nbsp;&nbsp;${row.C}</span>`
+                    )
+                )
+
+                .label(
+                    3,
+                    newText(
+                        "answer_D",
+                        `<span style="font-size:1.15em;"><b>D.</b>&nbsp;&nbsp;${row.D}</span>`
+                    )
+                )
+
+                .radio()
+                .vertical()
+                .labelsPosition("right")
+                .center()
+
+                .cssContainer({
+                    "width": "850px",
+                    "font-size": "1.2em",
+                    "line-height": "2",
+                    "margin": "0 auto"
+                })
+
+                .log("last")
+                .print(),
+
+
+            // ------------------------------------------------
+            // Warning
+            // ------------------------------------------------
+
+            newText(
+                "proficiency_warning",
+                "Bitte wählen Sie eine Antwort aus."
+            )
+                .color("red")
+                .center()
+                .css({
+                    "font-size": "1.1em",
+                    "font-weight": "bold",
+                    "margin-top": "25px"
+                })
+                .hidden()
+                .print(),
+
+
+            // ------------------------------------------------
+            // Continue
+            // ------------------------------------------------
+
+            newButton(
+                "proficiency_continue",
+                "Weiter"
+            )
+                .center()
+                .css(buttonStyle)
+                .print()
+                .wait(
+                    getScale("proficiency_answer")
+                        .test.selected()
+                        .failure(
+                            getText("proficiency_warning")
+                                .visible()
+                        )
+                )
+        )
+
+        // Proficiency information saved in the results
+        .log("Question", row.Question)
+        .log("OptionA", row.A)
+        .log("OptionB", row.B)
+        .log("OptionC", row.C)
+        .log("OptionD", row.D)
+        .log("CorrectAnswer", row["Correct answer"])
+        .log("CorrectKey", correctKey)
+        .log("Level", row.Level);
+    }
+);
+
+
+// ============================================================
+// 16. PROLIFIC ID
+// ============================================================
+
+newTrial("prolific_id",
+
+    newText(
+        "prolific_title",
+        "Prolific-ID"
+    )
+        .center()
+        .css(titleStyle)
+        .print(),
+
+    newText(
+        "prolific_text",
+        `
+        Bitte geben Sie hier Ihre Prolific-ID ein.
+        <br><br>
+        Wir benötigen diese zur Auszahlung der Vergütung für Ihre Teilnahme.
+        `
+    )
+        .center()
+        .css(centeredBodyStyle)
+        .print(),
+
+    newTextInput(
+        "prolific_input",
+        ""
+    )
+        .lines(1)
+        .size(450, 45)
+        .center()
+        .log()
+        .print(),
+
+    newText(
+        "prolific_warning",
+        "Bitte geben Sie Ihre Prolific-ID ein."
+    )
+        .color("red")
+        .center()
+        .css({
+            "font-size": "1.1em",
+            "font-weight": "bold",
+            "margin-top": "20px"
+        })
+        .hidden()
+        .print(),
+
+    newButton(
+        "prolific_continue",
+        "Weiter"
+    )
+        .center()
+        .css(buttonStyle)
+        .print()
+        .wait(
+            getTextInput("prolific_input")
+                .test.text(/\S+/)
+                .failure(
+                    getText("prolific_warning")
+                        .visible()
+                )
+        )
+);
+
+
+// ============================================================
+// 17. SEND RESULTS
+// ============================================================
+
 SendResults("send_results");
 
 
-// 5. Completion Screen
+// ============================================================
+// 18. COMPLETION SCREEN
+// ============================================================
+
 newTrial("completion",
 
     newText(
         "completion_message",
-        "Thank you for your participation!<br><br>You may now close this window."
+        `
+        Vielen Dank für Ihre Teilnahme!
+        <br><br>
+        Alle Teile des Experiments sind abgeschlossen.
+        Sie können diesen Tab nun schließen.
+        `
     )
         .center()
         .css({
             "font-size": "2em",
             "font-weight": "bold",
             "line-height": "1.5",
+            "max-width": "900px",
             "text-align": "center",
-            "margin-top": "100px"
+            "margin": "100px auto 0 auto"
         })
         .print(),
 
+    // Keep the final page visible
     newButton("void")
         .wait()
 );
