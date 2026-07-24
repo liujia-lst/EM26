@@ -2,16 +2,16 @@
 // 0. GENERAL SETTINGS
 // ============================================================
 
-// Remove the "PennController." prefix
 PennController.ResetPrefix(null);
+
+PennController.AddHost(
+    "https://coli.uni-saarland.de/~jachmann/FoEM2026/"
+);
 
 // Uncomment only when the experiment is ready for data collection
 // DebugOff();
 
-// Optional: preload audio files from a ZIP archive
-// PreloadZip("https://your-audio-hosting-link.zip");
-
-// Replace XX with the actual duration of the experiment
+// Replace XX with the actual experiment duration
 const EXPERIMENT_DURATION = "XX";
 
 
@@ -71,6 +71,29 @@ const dropDownStyle = {
     "margin-bottom": "10px"
 };
 
+const inputStyle = {
+    "font-size": "1.15em",
+    "margin-bottom": "10px",
+    "resize": "none"
+};
+
+const warningStyle = {
+    "font-size": "1.1em",
+    "font-weight": "bold",
+    "line-height": "1.5",
+    "margin-top": "25px",
+    "text-align": "center"
+};
+
+const scaleLabelStyle = {
+    "font-size": "1.3em",
+    "font-weight": "bold",
+    "line-height": "1.4",
+    "margin-top": "30px",
+    "margin-bottom": "8px",
+    "text-align": "center"
+};
+
 
 // ============================================================
 // 2. EXPERIMENT SEQUENCE
@@ -84,7 +107,11 @@ Sequence(
     "general_information",
 
     "questionnaire_intro",
-    "questionnaire",
+    "questionnaire_common",
+    "questionnaire_l2",
+    "questionnaire_l2_residence",
+    "questionnaire_l2_skills",
+    "questionnaire_native",
 
     "main_instructions",
     "practice_instructions",
@@ -125,9 +152,9 @@ newTrial("welcome",
         `
         Sehr geehrte Teilnehmerin, sehr geehrter Teilnehmer,
         <br><br>
-        willkommen zu unserer Reaktionszeitstudie zur Sprachverarbeitung.
-        Dieses Experiment wird im Rahmen des Kurses
-        „Experimentelle Methoden in der psycholinguistischen Forschung – WS2026“
+        herzlich willkommen zu unserer Reaktionszeitstudie zur
+        Sprachverarbeitung. Dieses Experiment wird im Rahmen des Kurses
+        „Experimentelle Methoden in der psycholinguistischen Forschung – SS2026“
         an der Universität des Saarlandes durchgeführt.
         `
     )
@@ -149,7 +176,7 @@ newTrial("welcome",
 
 
 // ============================================================
-// 4. CONSENT FORM
+// 4. CONSENT FORM — GERMAN AND ENGLISH
 // ============================================================
 
 newTrial("consent",
@@ -163,24 +190,68 @@ newTrial("consent",
         .print(),
 
     newText(
-        "consent_text",
+        "consent_text_german",
         `
-        Ich bin bereit, an einer Reaktionszeitstudie zur Sprachverarbeitung
-        teilzunehmen.
+        Ich erkläre mich bereit, an einer Reaktionszeitstudie zur
+        Sprachverarbeitung teilzunehmen.
         <br><br>
-        Ich wurde darüber informiert, dass ich den Versuch jederzeit ohne
-        Angabe von Gründen und ohne Nachteile abbrechen kann. Insbesondere
-        ist mir bewusst, dass meine Antworten gespeichert werden, wobei diese
-        aber nicht mit meinen persönlichen Daten in Verbindung gebracht
-        werden können.
+        Ich wurde darüber informiert, dass ich meine Teilnahme jederzeit
+        ohne Angabe von Gründen und ohne daraus entstehende Nachteile
+        abbrechen kann. Mir ist bewusst, dass meine Antworten gespeichert
+        werden, diese jedoch nicht mit meinen persönlichen Daten in
+        Verbindung gebracht werden können.
         <br><br>
-        Alle Daten werden anonym erhoben und weiterverarbeitet. Alle Daten
-        werden ausschließlich zu wissenschaftlichen Zwecken verwendet und
-        können zu wissenschaftlichen Zwecken an Dritte, beispielsweise an
-        Forschungseinrichtungen, weitergegeben werden.
+        Die Datenerhebung und -verarbeitung erfolgt vollständig anonymisiert.
+        Alle Daten werden ausschließlich für wissenschaftliche Zwecke
+        verwendet und können für diese Zwecke an Dritte
+        (Forschungseinrichtungen) weitergegeben werden.
+        `
+    )
+        .center()
+        .css(bodyStyle)
+        .print(),
+
+    newText(
+        "consent_separator",
+        `
+        <hr style="
+            max-width:950px;
+            margin:40px auto;
+            border:none;
+            border-top:1px solid #999;
+        ">
+        `
+    )
+        .center()
+        .print(),
+
+    newText(
+        "consent_english_title",
+        "English Translation"
+    )
+        .center()
+        .css({
+            "font-size": "1.8em",
+            "font-weight": "bold",
+            "margin-bottom": "25px",
+            "text-align": "center"
+        })
+        .print(),
+
+    newText(
+        "consent_text_english",
+        `
+        I agree to participate in a reaction time study on language
+        processing.
         <br><br>
-        Ich habe die Teilnehmerinformationen gelesen und erkläre hiermit
-        mein Einverständnis mit den oben genannten Bedingungen.
+        I have been informed that I may withdraw from the study at any time
+        without giving a reason and without any negative consequences.
+        In particular, I understand that my responses will be stored,
+        but they cannot be linked to my personal information.
+        <br><br>
+        All data will be collected and processed anonymously. All data
+        will be used exclusively for scientific purposes and may be shared
+        with third parties (research institutions) for scientific purposes.
         `
     )
         .center()
@@ -189,31 +260,39 @@ newTrial("consent",
 
     newScale(
         "consent_checkbox",
-        "Ich habe die Teilnehmerinformationen gelesen und stimme der Teilnahme an der Studie zu."
+        `
+        Ich habe die Teilnehmerinformationen gelesen und erkläre hiermit
+        mein Einverständnis mit den oben genannten Bedingungen.
+        <br>
+        <span style="font-style:italic;">
+            I have read the participant information and hereby give my
+            consent to the above conditions.
+        </span>
+        `
     )
         .checkbox()
         .labelsPosition("right")
         .center()
         .cssContainer({
             "width": "900px",
-            "font-size": "1.2em",
+            "font-size": "1.15em",
             "line-height": "1.5",
-            "margin-top": "30px"
+            "margin-top": "35px"
         })
         .log("last")
         .print(),
 
     newText(
         "consent_warning",
-        "Bitte bestätigen Sie Ihre Einwilligung, bevor Sie fortfahren."
+        `
+        Bitte bestätigen Sie Ihre Einwilligung, bevor Sie fortfahren.
+        <br>
+        Please confirm your consent before continuing.
+        `
     )
         .color("red")
         .center()
-        .css({
-            "font-size": "1.1em",
-            "font-weight": "bold",
-            "margin-top": "20px"
-        })
+        .css(warningStyle)
         .hidden()
         .print(),
 
@@ -252,25 +331,23 @@ newTrial("general_information",
     newText(
         "general_text",
         `
-        Dieses Experiment besteht aus drei Teilen: einem Fragebogen,
-        der Hauptaufgabe und einem Deutsch-Sprachtest.
+        Dieses Experiment besteht aus drei Teilen: einem demografischen
+        Fragebogen, der Hauptaufgabe und einem Deutsch-Sprachtest.
+        Die Teilnahme wird etwa <b>${EXPERIMENT_DURATION} Minuten</b>
+        in Anspruch nehmen.
         <br><br>
-        Während der Studie werden Sie kurze Audioaufnahmen hören, und direkt
-        im Anschluss erscheint eine Verständnisfrage auf dem Bildschirm.
-        Sie können die Frage beantworten, indem Sie entweder die Taste
+        Während der Studie werden Sie kurze Audioaufnahmen hören.
+        Unmittelbar danach erscheint eine Verständnisfrage auf dem Bildschirm.
+        Sie können diese Frage beantworten, indem Sie entweder die Taste
         <b>F</b> oder <b>J</b> auf Ihrer Tastatur drücken.
         <br><br>
-        Wir zeichnen Ihre Antwort und die dafür benötigte Zeit auf.
-        Bitte versuchen Sie, so schnell wie möglich zu antworten.
+        Wir erfassen dabei Ihre Antwort sowie Ihre Reaktionszeit.
+        Bitte versuchen Sie, so schnell und so genau wie möglich zu antworten.
         Durch Drücken der Leertaste gelangen Sie zur nächsten Frage.
         <br><br>
-        Sie werden den Deutsch-Sprachtest nach der oben genannten
-        Hauptaufgabe absolvieren.
-        <br><br>
-        Wir werden auch einige demografische Daten wie Alter,
-        Muttersprache und Deutschniveau erfassen.
-        <br><br>
-        Die Teilnahme dauert etwa <b>${EXPERIMENT_DURATION} Minuten</b>.
+        Da es sich um ein Hörexperiment handelt, stellen Sie bitte sicher,
+        dass Sie sich in einer ruhigen Umgebung befinden und den Ton gut
+        hören können.
         `
     )
         .center()
@@ -306,7 +383,10 @@ newTrial("questionnaire_intro",
 
     newText(
         "questionnaire_intro_text",
-        "In diesem Fragebogen werden wir Sie nach einigen demografischen Daten fragen."
+        `
+        In diesem Fragebogen werden wir Sie nach einigen demografischen
+        Angaben und Ihrem sprachlichen Hintergrund fragen.
+        `
     )
         .center()
         .css(centeredBodyStyle)
@@ -326,35 +406,38 @@ newTrial("questionnaire_intro",
 
 
 // ============================================================
-// 7. DEMOGRAPHIC QUESTIONNAIRE
+// 7. COMMON QUESTIONNAIRE
 // ============================================================
 
-newTrial("questionnaire",
+newTrial("questionnaire_common",
+
+    newVar("participant_type", "")
+        .global()
+        .log("final"),
+
+    newVar("lived_german_country", "")
+        .global()
+        .log("final"),
 
     newText(
-        "questionnaire_title",
-        "Demografische Angaben"
+        "common_questionnaire_title",
+        "Allgemeine Angaben"
     )
         .center()
         .css(titleStyle)
         .print(),
 
     newText(
-        "questionnaire_description",
+        "common_questionnaire_description",
         "Bitte beantworten Sie die folgenden Fragen."
     )
         .center()
         .css({
             "font-size": "1.3em",
-            "margin-bottom": "30px",
+            "margin-bottom": "20px",
             "text-align": "center"
         })
         .print(),
-
-
-    // --------------------------------------------------------
-    // 1. Age
-    // --------------------------------------------------------
 
     newText(
         "age_label",
@@ -364,21 +447,20 @@ newTrial("questionnaire",
         .css(formLabelStyle)
         .print(),
 
-    newTextInput("age", "")
+    newTextInput(
+        "age",
+        ""
+    )
         .lines(1)
         .size(400, 40)
         .center()
+        .css(inputStyle)
         .log()
         .print(),
 
-
-    // --------------------------------------------------------
-    // 2. Gender
-    // --------------------------------------------------------
-
     newText(
         "gender_label",
-        "2. Geschlecht:"
+        "2. Welches Geschlecht haben Sie?"
     )
         .center()
         .css(formLabelStyle)
@@ -391,7 +473,7 @@ newTrial("questionnaire",
         .add(
             "Weiblich",
             "Männlich",
-            "Nicht-binär",
+            "Divers",
             "Keine Angabe"
         )
         .center()
@@ -399,164 +481,70 @@ newTrial("questionnaire",
         .log()
         .print(),
 
-
-    // --------------------------------------------------------
-    // 3. Mother tongue
-    // --------------------------------------------------------
-
     newText(
         "mother_tongue_label",
         "3. Was ist Ihre Muttersprache?"
     )
         .center()
-        .css(formLabelStyle)
+        .css({
+            "font-size": "1.35em",
+            "font-weight": "bold",
+            "line-height": "1.4",
+            "margin-top": "28px",
+            "margin-bottom": "4px",
+            "text-align": "center"
+        })
         .print(),
 
-    newTextInput("mother_tongue", "")
-        .lines(1)
-        .size(400, 40)
-        .center()
-        .log()
-        .print(),
-
-
-    // --------------------------------------------------------
-    // 4. German level
-    // --------------------------------------------------------
-
-    newText(
-        "german_level_label",
-        "4. Wie schätzen Sie Ihr allgemeines Deutschniveau ein?"
+    newScale(
+        "mother_tongue",
+        "Deutsch",
+        "Eine andere Sprache"
     )
-        .center()
-        .css(formLabelStyle)
-        .print(),
+        .radio()
+        .horizontal()
+        .labelsPosition("right")
+        .css({
+            "font-size": "1.25em"
+        })
+        .log("last"),
 
-    newDropDown(
-        "german_level",
-        "Bitte auswählen"
-    )
-        .add(
-            "Deutsch als Muttersprache",
-            "A1",
-            "A2",
-            "B1",
-            "B2",
-            "C1",
-            "C2"
-        )
-        .center()
-        .css(dropDownStyle)
-        .log()
-        .print(),
-
-
-    // --------------------------------------------------------
-    // 5. Years of formal German classes
-    // --------------------------------------------------------
-
-    newText(
-        "formal_study_label",
-        "5. Wie viele Jahre formalen Deutschunterricht hatten Sie?"
-    )
-        .center()
-        .css(formLabelStyle)
-        .print(),
-
-    newTextInput("formal_study", "")
-        .lines(1)
-        .size(400, 40)
-        .center()
-        .log()
-        .print(),
-
-
-    // --------------------------------------------------------
-    // 6. Handedness
-    // --------------------------------------------------------
-
-    newText(
-        "handedness_label",
-        "6. Welche Hand ist Ihre dominante Hand?"
-    )
-        .center()
-        .css(formLabelStyle)
-        .print(),
-
-    newDropDown(
-        "handedness",
-        "Bitte auswählen"
+    newCanvas(
+        "mother_tongue_canvas",
+        760,
+        65
     )
         .add(
-            "Rechtshändig",
-            "Linkshändig",
-            "Beidhändig"
+            175,
+            10,
+            getScale("mother_tongue")
         )
         .center()
-        .css(dropDownStyle)
-        .log()
         .print(),
-
-
-    // --------------------------------------------------------
-    // 7. Hearing
-    // --------------------------------------------------------
 
     newText(
-        "hearing_label",
-        "7. Haben Sie eine bekannte Hörbeeinträchtigung oder verwenden Sie ein Hörgerät?"
-    )
-        .center()
-        .css(formLabelStyle)
-        .print(),
-
-    newDropDown(
-        "hearing",
-        "Bitte auswählen"
-    )
-        .add(
-            "Nein",
-            "Ja"
-        )
-        .center()
-        .css(dropDownStyle)
-        .log()
-        .print(),
-
-
-    // --------------------------------------------------------
-    // Warning
-    // --------------------------------------------------------
-
-    newText(
-        "questionnaire_warning",
-        "Bitte beantworten Sie alle Fragen, bevor Sie fortfahren."
+        "common_questionnaire_warning",
+        `
+        Bitte beantworten Sie alle Fragen.
+        Verwenden Sie für das Alter nur Ziffern.
+        `
     )
         .color("red")
         .center()
-        .css({
-            "font-size": "1.1em",
-            "font-weight": "bold",
-            "margin-top": "25px"
-        })
+        .css(warningStyle)
         .hidden()
         .print(),
 
-
-    // --------------------------------------------------------
-    // Submit button
-    // --------------------------------------------------------
-
     newButton(
-        "questionnaire_continue",
-        "Antworten absenden"
+        "common_questionnaire_continue",
+        "Weiter"
     )
         .center()
         .css(buttonStyle)
         .print()
         .wait(
             getTextInput("age")
-                .test.text(/\S+/)
+                .test.text(/^\s*[0-9]{1,3}\s*$/)
 
                 .and(
                     getDropDown("gender")
@@ -564,40 +552,696 @@ newTrial("questionnaire",
                 )
 
                 .and(
-                    getTextInput("mother_tongue")
-                        .test.text(/\S+/)
-                )
-
-                .and(
-                    getDropDown("german_level")
-                        .test.selected()
-                )
-
-                .and(
-                    getTextInput("formal_study")
-                        .test.text(/\S+/)
-                )
-
-                .and(
-                    getDropDown("handedness")
-                        .test.selected()
-                )
-
-                .and(
-                    getDropDown("hearing")
+                    getScale("mother_tongue")
                         .test.selected()
                 )
 
                 .failure(
-                    getText("questionnaire_warning")
+                    getText("common_questionnaire_warning")
                         .visible()
+                )
+        ),
+
+    getScale("mother_tongue")
+        .test.selected("Deutsch")
+        .success(
+            getVar("participant_type")
+                .set("native")
+        )
+        .failure(
+            getVar("participant_type")
+                .set("L2")
+        )
+);
+
+
+// ============================================================
+// 8. L2 QUESTIONNAIRE
+// ============================================================
+
+newTrial("questionnaire_l2",
+
+    getVar("participant_type")
+        .test.is("L2")
+        .success(
+
+            newText(
+                "l2_title",
+                "Sprachlicher Hintergrund"
+            )
+                .center()
+                .css(titleStyle)
+                .print(),
+
+            newText(
+                "l2_description",
+                "Die folgenden Fragen beziehen sich auf Ihre Deutschkenntnisse."
+            )
+                .center()
+                .css({
+                    "font-size": "1.3em",
+                    "margin-bottom": "25px",
+                    "text-align": "center"
+                })
+                .print(),
+
+            newText(
+                "german_level_label",
+                "1. Wie schätzen Sie Ihr Deutschniveau ein?"
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newDropDown(
+                "german_level",
+                "Bitte auswählen"
+            )
+                .add(
+                    "A1",
+                    "A2",
+                    "B1",
+                    "B2",
+                    "C1",
+                    "C2"
+                )
+                .center()
+                .css(dropDownStyle)
+                .log()
+                .print(),
+
+            newText(
+                "age_started_german_label",
+                `
+                2. In welchem Alter haben Sie zum ersten Mal angefangen,
+                aktiv Deutsch zu lernen?
+                `
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newTextInput(
+                "age_started_german",
+                ""
+            )
+                .lines(1)
+                .size(400, 40)
+                .center()
+                .css(inputStyle)
+                .log()
+                .print(),
+
+            newText(
+                "formal_german_years_label",
+                `
+                3. Wie viele Jahre lang haben Sie Deutsch im Rahmen eines
+                formellen Unterrichts (z. B. in der Schule oder in Kursen)
+                gelernt?
+                `
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newTextInput(
+                "formal_german_years",
+                ""
+            )
+                .lines(1)
+                .size(400, 40)
+                .center()
+                .css(inputStyle)
+                .log()
+                .print(),
+
+            newText(
+                "lived_german_country_label",
+                `
+                4. Haben Sie jemals in einem deutschsprachigen Land gelebt?
+                `
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newDropDown(
+                "lived_german_country_answer",
+                "Bitte auswählen"
+            )
+                .add(
+                    "Nein",
+                    "Ja"
+                )
+                .center()
+                .css(dropDownStyle)
+                .log()
+                .print(),
+
+            newText(
+                "l2_warning",
+                `
+                Bitte beantworten Sie alle Fragen.
+                Verwenden Sie für das Alter nur Ziffern. Für die Anzahl der
+                Unterrichtsjahre können Sie ganze Zahlen oder Dezimalzahlen
+                mit Punkt oder Komma eingeben.
+                `
+            )
+                .color("red")
+                .center()
+                .css(warningStyle)
+                .hidden()
+                .print(),
+
+            newButton(
+                "l2_continue",
+                "Weiter"
+            )
+                .center()
+                .css(buttonStyle)
+                .print()
+                .wait(
+                    getDropDown("german_level")
+                        .test.selected()
+
+                        .and(
+                            getTextInput("age_started_german")
+                                .test.text(/^\s*[0-9]{1,3}\s*$/)
+                        )
+
+                        .and(
+                            getTextInput("formal_german_years")
+                                .test.text(
+                                    /^\s*[0-9]+(?:[.,][0-9]+)?\s*$/
+                                )
+                        )
+
+                        .and(
+                            getDropDown("lived_german_country_answer")
+                                .test.selected()
+                        )
+
+                        .failure(
+                            getText("l2_warning")
+                                .visible()
+                        )
+                ),
+
+            getDropDown("lived_german_country_answer")
+                .test.selected("Ja")
+                .success(
+                    getVar("lived_german_country")
+                        .set("Ja")
+                )
+                .failure(
+                    getVar("lived_german_country")
+                        .set("Nein")
                 )
         )
 );
 
 
 // ============================================================
-// 8. MAIN-TASK INSTRUCTIONS
+// 9. L2 RESIDENCE DURATION
+// ============================================================
+
+newTrial("questionnaire_l2_residence",
+
+    getVar("participant_type")
+        .test.is("L2")
+        .success(
+
+            getVar("lived_german_country")
+                .test.is("Ja")
+                .success(
+
+                    newText(
+                        "residence_title",
+                        "Aufenthalt in einem deutschsprachigen Land"
+                    )
+                        .center()
+                        .css(titleStyle)
+                        .print(),
+
+                    newText(
+                        "residence_duration_label",
+                        `
+                        Wie lange haben Sie insgesamt in einem
+                        deutschsprachigen Land gelebt?
+                        `
+                    )
+                        .center()
+                        .css(formLabelStyle)
+                        .print(),
+
+                    newDropDown(
+                        "residence_duration",
+                        "Bitte auswählen"
+                    )
+                        .add(
+                            "Weniger als 6 Monate",
+                            "6 bis 11 Monate",
+                            "1 bis 2 Jahre",
+                            "3 bis 5 Jahre",
+                            "Mehr als 5 Jahre"
+                        )
+                        .center()
+                        .css({
+                            "font-size": "1.15em",
+                            "width": "500px",
+                            "height": "42px",
+                            "margin-bottom": "10px"
+                        })
+                        .log()
+                        .print(),
+
+                    newText(
+                        "residence_warning",
+                        "Bitte wählen Sie eine Aufenthaltsdauer aus."
+                    )
+                        .color("red")
+                        .center()
+                        .css(warningStyle)
+                        .hidden()
+                        .print(),
+
+                    newButton(
+                        "residence_continue",
+                        "Weiter"
+                    )
+                        .center()
+                        .css(buttonStyle)
+                        .print()
+                        .wait(
+                            getDropDown("residence_duration")
+                                .test.selected()
+                                .failure(
+                                    getText("residence_warning")
+                                        .visible()
+                                )
+                        )
+                )
+        )
+);
+
+
+// ============================================================
+// 10. L2 SELF-RATING
+// ============================================================
+
+newTrial("questionnaire_l2_skills",
+
+    getVar("participant_type")
+        .test.is("L2")
+        .success(
+
+            newText(
+                "skills_title",
+                "Selbsteinschätzung der Deutschkenntnisse"
+            )
+                .center()
+                .css(titleStyle)
+                .print(),
+
+            newText(
+                "skills_instructions",
+                `
+                Bitte bewerten Sie Ihre Deutschkenntnisse in den folgenden
+                Bereichen auf einer Skala von 1 bis 7, wobei
+                <b>1 für „keine Kenntnisse“</b> und
+                <b>7 für „sehr gute Kenntnisse“</b> steht.
+                `
+            )
+                .center()
+                .css(centeredBodyStyle)
+                .print(),
+
+            newText(
+                "speaking_label",
+                "Sprechen"
+            )
+                .center()
+                .css(scaleLabelStyle)
+                .print(),
+
+            newScale(
+                "speaking_rating",
+                "1", "2", "3", "4", "5", "6", "7"
+            )
+                .radio()
+                .horizontal()
+                .labelsPosition("top")
+                .css({
+                    "font-size": "1.2em"
+                })
+                .log("last"),
+
+            newCanvas(
+                "speaking_canvas",
+                760,
+                70
+            )
+                .add(
+                    135,
+                    10,
+                    getScale("speaking_rating")
+                )
+                .center()
+                .print(),
+
+            newText(
+                "listening_label",
+                "Hörverstehen"
+            )
+                .center()
+                .css(scaleLabelStyle)
+                .print(),
+
+            newScale(
+                "listening_rating",
+                "1", "2", "3", "4", "5", "6", "7"
+            )
+                .radio()
+                .horizontal()
+                .labelsPosition("top")
+                .css({
+                    "font-size": "1.2em"
+                })
+                .log("last"),
+
+            newCanvas(
+                "listening_canvas",
+                760,
+                70
+            )
+                .add(
+                    135,
+                    10,
+                    getScale("listening_rating")
+                )
+                .center()
+                .print(),
+
+            newText(
+                "writing_label",
+                "Schreiben"
+            )
+                .center()
+                .css(scaleLabelStyle)
+                .print(),
+
+            newScale(
+                "writing_rating",
+                "1", "2", "3", "4", "5", "6", "7"
+            )
+                .radio()
+                .horizontal()
+                .labelsPosition("top")
+                .css({
+                    "font-size": "1.2em"
+                })
+                .log("last"),
+
+            newCanvas(
+                "writing_canvas",
+                760,
+                70
+            )
+                .add(
+                    135,
+                    10,
+                    getScale("writing_rating")
+                )
+                .center()
+                .print(),
+
+            newText(
+                "reading_label",
+                "Leseverstehen"
+            )
+                .center()
+                .css(scaleLabelStyle)
+                .print(),
+
+            newScale(
+                "reading_rating",
+                "1", "2", "3", "4", "5", "6", "7"
+            )
+                .radio()
+                .horizontal()
+                .labelsPosition("top")
+                .css({
+                    "font-size": "1.2em"
+                })
+                .log("last"),
+
+            newCanvas(
+                "reading_canvas",
+                760,
+                70
+            )
+                .add(
+                    135,
+                    10,
+                    getScale("reading_rating")
+                )
+                .center()
+                .print(),
+
+            newText(
+                "skills_warning",
+                "Bitte bewerten Sie alle vier Bereiche."
+            )
+                .color("red")
+                .center()
+                .css(warningStyle)
+                .hidden()
+                .print(),
+
+            newButton(
+                "skills_continue",
+                "Weiter"
+            )
+                .center()
+                .css(buttonStyle)
+                .print()
+                .wait(
+                    getScale("speaking_rating")
+                        .test.selected()
+
+                        .and(
+                            getScale("listening_rating")
+                                .test.selected()
+                        )
+
+                        .and(
+                            getScale("writing_rating")
+                                .test.selected()
+                        )
+
+                        .and(
+                            getScale("reading_rating")
+                                .test.selected()
+                        )
+
+                        .failure(
+                            getText("skills_warning")
+                                .visible()
+                        )
+                )
+        )
+);
+
+
+// ============================================================
+// 11. QUESTIONNAIRE FOR NATIVE GERMAN SPEAKERS
+// ============================================================
+
+newTrial("questionnaire_native",
+
+    getVar("participant_type")
+        .test.is("native")
+        .success(
+
+            newText(
+                "native_title",
+                "Sprachlicher Hintergrund"
+            )
+                .center()
+                .css(titleStyle)
+                .print(),
+
+            newText(
+                "native_description",
+                `
+                Die folgenden Fragen beziehen sich auf Ihren sprachlichen
+                Hintergrund.
+                `
+            )
+                .center()
+                .css({
+                    "font-size": "1.3em",
+                    "margin-bottom": "25px",
+                    "text-align": "center"
+                })
+                .print(),
+
+            newText(
+                "dialect_label",
+                `
+                1. Sprechen oder hören Sie regelmäßig einen bestimmten
+                deutschen Dialekt (z. B. Bayerisch, Schweizerdeutsch)?
+                `
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newDropDown(
+                "dialect",
+                "Bitte auswählen"
+            )
+                .add(
+                    "Nein",
+                    "Ja"
+                )
+                .center()
+                .css(dropDownStyle)
+                .log()
+                .print(),
+
+            newText(
+                "other_languages_label",
+                `
+                2. Welche anderen Sprachen sprechen Sie und wie gut?
+                `
+            )
+                .center()
+                .css(formLabelStyle)
+                .print(),
+
+            newText(
+                "other_languages_instructions",
+                `
+                Tragen Sie die Sprachen in die passenden Felder ein.
+                Sie können mehrere Sprachen durch Kommas trennen.
+                Lassen Sie ein Feld leer, wenn keine Sprache auf das
+                entsprechende Niveau zutrifft.
+                `
+            )
+                .center()
+                .css({
+                    "font-size": "1.15em",
+                    "line-height": "1.5",
+                    "max-width": "850px",
+                    "text-align": "center",
+                    "margin": "0 auto 20px auto"
+                })
+                .print(),
+
+            newText(
+                "elementary_languages_label",
+                "Elementare Kenntnisse:"
+            )
+                .center()
+                .css({
+                    "font-size": "1.2em",
+                    "font-weight": "bold",
+                    "margin-top": "15px",
+                    "margin-bottom": "8px"
+                })
+                .print(),
+
+            newTextInput(
+                "elementary_languages",
+                ""
+            )
+                .lines(1)
+                .size(550, 40)
+                .center()
+                .css(inputStyle)
+                .log()
+                .print(),
+
+            newText(
+                "advanced_languages_label",
+                "Fortgeschrittene Kenntnisse:"
+            )
+                .center()
+                .css({
+                    "font-size": "1.2em",
+                    "font-weight": "bold",
+                    "margin-top": "20px",
+                    "margin-bottom": "8px"
+                })
+                .print(),
+
+            newTextInput(
+                "advanced_languages",
+                ""
+            )
+                .lines(1)
+                .size(550, 40)
+                .center()
+                .css(inputStyle)
+                .log()
+                .print(),
+
+            newText(
+                "excellent_languages_label",
+                "Hervorragende Kenntnisse:"
+            )
+                .center()
+                .css({
+                    "font-size": "1.2em",
+                    "font-weight": "bold",
+                    "margin-top": "20px",
+                    "margin-bottom": "8px"
+                })
+                .print(),
+
+            newTextInput(
+                "excellent_languages",
+                ""
+            )
+                .lines(1)
+                .size(550, 40)
+                .center()
+                .css(inputStyle)
+                .log()
+                .print(),
+
+            newText(
+                "native_warning",
+                "Bitte beantworten Sie die Frage zum Dialekt."
+            )
+                .color("red")
+                .center()
+                .css(warningStyle)
+                .hidden()
+                .print(),
+
+            newButton(
+                "native_continue",
+                "Weiter"
+            )
+                .center()
+                .css(buttonStyle)
+                .print()
+                .wait(
+                    getDropDown("dialect")
+                        .test.selected()
+                        .failure(
+                            getText("native_warning")
+                                .visible()
+                        )
+                )
+        )
+);
+
+
+// ============================================================
+// 12. MAIN-TASK INSTRUCTIONS
 // ============================================================
 
 newTrial("main_instructions",
@@ -613,21 +1257,17 @@ newTrial("main_instructions",
     newText(
         "main_instructions_text",
         `
-        Vielen Dank für das Beantworten der Fragen. Nun fahren wir mit
-        dem zweiten Teil fort, der Hauptaufgabe.
+        Vielen Dank für das Beantworten der Fragen.
+        Nun folgt die Hauptaufgabe.
         <br><br>
-        Ihre Aufgabe ist es, sich die Audioaufnahme anzuhören und die
-        Frage so schnell wie möglich zu beantworten. Zuerst hören Sie
-        eine kurze Audioaufnahme. Direkt im Anschluss erscheint eine
-        Verständnisfrage mit zwei Antwortmöglichkeiten auf dem Bildschirm.
+        Ihre Aufgabe besteht darin, eine kurze Audioaufnahme anzuhören und
+        die anschließend präsentierte Frage so schnell und so genau wie
+        möglich zu beantworten.
         <br><br>
-        Sie können die Frage beantworten, indem Sie entweder
-        <b>F</b> oder <b>J</b> auf der Tastatur drücken. Ihre Antwort
-        sowie die Antwortzeit werden aufgezeichnet. Durch Drücken der
-        Leertaste gelangen Sie zur nächsten Frage.
-        <br><br>
-        Da es sich um ein Hörexperiment handelt, stellen Sie bitte sicher,
-        dass Ihre Umgebung ruhig ist und Sie den Ton gut hören können.
+        Unmittelbar nach der Audioaufnahme erscheint eine Verständnisfrage
+        mit zwei Antwortmöglichkeiten auf dem Bildschirm. Sie antworten,
+        indem Sie entweder die Taste <b>F</b> oder <b>J</b> drücken.
+        Ihre Antwort und Ihre Reaktionszeit werden aufgezeichnet.
         `
     )
         .center()
@@ -648,7 +1288,7 @@ newTrial("main_instructions",
 
 
 // ============================================================
-// 9. PRACTICE INSTRUCTIONS
+// 13. PRACTICE INSTRUCTIONS
 // ============================================================
 
 newTrial("practice_instructions",
@@ -664,14 +1304,13 @@ newTrial("practice_instructions",
     newText(
         "practice_text",
         `
-        Die ersten 5 Aufgaben dienen der Übung. Sie sehen genau dasselbe
-        Format wie bei den eigentlichen Aufgaben.
+        Die ersten 5 Durchgänge dienen der Übung. Das Format entspricht
+        genau dem der eigentlichen Aufgaben: Sie hören eine kurze
+        Audioaufnahme, eine Frage mit zwei Antwortmöglichkeiten erscheint
+        auf dem Bildschirm, und Sie antworten durch Drücken der Taste
+        <b>F</b> oder <b>J</b>.
         <br><br>
-        Sie hören eine Audioaufnahme, eine Frage erscheint auf dem
-        Bildschirm, und Sie können diese durch Drücken von
-        <b>F</b> oder <b>J</b> beantworten.
-        <br><br>
-        Denken Sie daran, so schnell wie möglich zu antworten.
+        Denken Sie daran, so schnell und so genau wie möglich zu antworten.
         `
     )
         .center()
@@ -692,16 +1331,20 @@ newTrial("practice_instructions",
 
 
 // ============================================================
-// 10. SHARED LISTENING-TRIAL FUNCTION
+// 14. SHARED LISTENING-TRIAL FUNCTION
 // ============================================================
 
-function createListeningTrial(trialLabel, row) {
+function createListeningTrial(trialLabel, row, groupLabel) {
 
     return newTrial(trialLabel,
 
-        // ----------------------------------------------------
-        // Play audio
-        // ----------------------------------------------------
+        // Reaction time in milliseconds.
+        // Timer starts after question and options are visible.
+        newVar(
+            "RT",
+            0
+        )
+            .log("final"),
 
         newAudio(
             "stimulus",
@@ -709,11 +1352,6 @@ function createListeningTrial(trialLabel, row) {
         )
             .play()
             .wait(),
-
-
-        // ----------------------------------------------------
-        // Comprehension question
-        // ----------------------------------------------------
 
         newText(
             "question",
@@ -729,11 +1367,6 @@ function createListeningTrial(trialLabel, row) {
                 "margin": "0 auto 50px auto"
             })
             .print(),
-
-
-        // ----------------------------------------------------
-        // F option
-        // ----------------------------------------------------
 
         newText(
             "optF",
@@ -777,11 +1410,6 @@ function createListeningTrial(trialLabel, row) {
                 "text-align": "center"
             }),
 
-
-        // ----------------------------------------------------
-        // J option
-        // ----------------------------------------------------
-
         newText(
             "optJ",
             `
@@ -824,11 +1452,6 @@ function createListeningTrial(trialLabel, row) {
                 "text-align": "center"
             }),
 
-
-        // ----------------------------------------------------
-        // Display F and J side by side
-        // ----------------------------------------------------
-
         newCanvas(
             "options_canvas",
             1000,
@@ -847,10 +1470,9 @@ function createListeningTrial(trialLabel, row) {
             .center()
             .print(),
 
-
-        // ----------------------------------------------------
-        // Record response
-        // ----------------------------------------------------
+        // Start reaction-time timer
+        getVar("RT")
+            .set(() => Date.now()),
 
         newKey(
             "response",
@@ -859,18 +1481,15 @@ function createListeningTrial(trialLabel, row) {
             .log("last")
             .wait(),
 
+        // Calculate elapsed RT in milliseconds
+        getVar("RT")
+            .set(startTime => Date.now() - startTime),
 
-        // Remove question and options
         getText("question")
             .remove(),
 
         getCanvas("options_canvas")
             .remove(),
-
-
-        // ----------------------------------------------------
-        // Preparation screen
-        // ----------------------------------------------------
 
         newText(
             "next_instruction",
@@ -897,10 +1516,9 @@ function createListeningTrial(trialLabel, row) {
             .wait()
     )
 
-    // Trial information saved in the results
     .log("Item", row.Item)
     .log("Condition", row.Condition)
-    .log("Group", row.Group)
+    .log("Group", groupLabel)
     .log("AudioFile", row.AudioFile)
     .log("Question", row.Question)
     .log("OptionF", row.OptionF)
@@ -910,33 +1528,22 @@ function createListeningTrial(trialLabel, row) {
 
 
 // ============================================================
-// 11. PRACTICE TRIALS
+// 15. PRACTICE TRIALS
 // ============================================================
 
-// practice.csv columns:
-//
-// Group
-// Item
-// Condition
-// AudioFile
-// Question
-// OptionF
-// OptionJ
-// TargetKey
-
 Template(
-    GetTable("practice.csv")
-        .setGroupColumn("Group"),
+    GetTable("practice.csv"),
 
     row => createListeningTrial(
         "practice_trials",
-        row
+        row,
+        "practice"
     )
 );
 
 
 // ============================================================
-// 12. AFTER PRACTICE
+// 16. AFTER PRACTICE
 // ============================================================
 
 newTrial("after_practice",
@@ -952,10 +1559,10 @@ newTrial("after_practice",
     newText(
         "after_practice_text",
         `
-        Damit ist der Übungsteil des Experiments abgeschlossen.
-        Nun beginnt der Hauptteil.
+        Damit ist der Übungsteil abgeschlossen. Nun beginnt das eigentliche
+        Experiment.
         <br><br>
-        Sobald Sie die Leertaste drücken, startet das Audio.
+        Sobald Sie die Leertaste drücken, startet die erste Audioaufnahme.
         Wenn Sie bereit sind, drücken Sie die Leertaste.
         `
     )
@@ -972,19 +1579,8 @@ newTrial("after_practice",
 
 
 // ============================================================
-// 13. MAIN EXPERIMENT TRIALS
+// 17. MAIN EXPERIMENT TRIALS
 // ============================================================
-
-// stimuli.csv must contain:
-//
-// Group
-// Item
-// Condition
-// AudioFile
-// Question
-// OptionF
-// OptionJ
-// TargetKey
 
 Template(
     GetTable("stimuli.csv")
@@ -992,20 +1588,21 @@ Template(
 
     row => createListeningTrial(
         "experiment_trials",
-        row
+        row,
+        row.Group
     )
 );
 
 
 // ============================================================
-// 14. AFTER MAIN TASK
+// 18. AFTER MAIN TASK
 // ============================================================
 
 newTrial("after_main",
 
     newText(
         "after_main_title",
-        "Hauptteil abgeschlossen"
+        "Hauptaufgabe abgeschlossen"
     )
         .center()
         .css(titleStyle)
@@ -1014,10 +1611,11 @@ newTrial("after_main",
     newText(
         "after_main_text",
         `
-        Vielen Dank. Der Hauptteil ist abgeschlossen.
+        Vielen Dank! Die Hauptaufgabe ist abgeschlossen.
         <br><br>
-        Zuletzt werden Sie einen Deutsch-Sprachtest absolvieren.
-        Wählen Sie für jede der folgenden Fragen die passendste Option aus.
+        Zuletzt bitten wir Sie, einen kurzen Deutsch-Sprachtest zu
+        absolvieren. Wählen Sie für jede der folgenden Fragen die
+        passendste Option aus.
         `
     )
         .center()
@@ -1041,37 +1639,25 @@ newTrial("after_main",
 
 
 // ============================================================
-// 15. GERMAN PROFICIENCY TEST
+// 19. GERMAN PROFICIENCY TEST
 // ============================================================
-
-// proficiency.csv columns:
-//
-// Question
-// A
-// B
-// C
-// D
-// Correct answer
-// Level
 
 Template(
     "proficiency.csv",
 
     row => {
 
-        // Determine the letter of the correct answer
+        const correctAnswer =
+            String(row["Correct answer"]).trim();
+
         const correctKey =
-            row.A === row["Correct answer"] ? "A" :
-            row.B === row["Correct answer"] ? "B" :
-            row.C === row["Correct answer"] ? "C" :
-            row.D === row["Correct answer"] ? "D" :
+            String(row.A).trim() === correctAnswer ? "A" :
+            String(row.B).trim() === correctAnswer ? "B" :
+            String(row.C).trim() === correctAnswer ? "C" :
+            String(row.D).trim() === correctAnswer ? "D" :
             "NA";
 
         return newTrial("proficiency_test",
-
-            // ------------------------------------------------
-            // Question
-            // ------------------------------------------------
 
             newText(
                 "proficiency_question",
@@ -1088,11 +1674,6 @@ Template(
                 })
                 .print(),
 
-
-            // ------------------------------------------------
-            // Answers A, B, C, D
-            // ------------------------------------------------
-
             newScale(
                 "proficiency_answer",
                 "A",
@@ -1100,57 +1681,22 @@ Template(
                 "C",
                 "D"
             )
-                .label(
-                    0,
-                    newText(
-                        "answer_A",
-                        `<span style="font-size:1.15em;"><b>A.</b>&nbsp;&nbsp;${row.A}</span>`
-                    )
-                )
-
-                .label(
-                    1,
-                    newText(
-                        "answer_B",
-                        `<span style="font-size:1.15em;"><b>B.</b>&nbsp;&nbsp;${row.B}</span>`
-                    )
-                )
-
-                .label(
-                    2,
-                    newText(
-                        "answer_C",
-                        `<span style="font-size:1.15em;"><b>C.</b>&nbsp;&nbsp;${row.C}</span>`
-                    )
-                )
-
-                .label(
-                    3,
-                    newText(
-                        "answer_D",
-                        `<span style="font-size:1.15em;"><b>D.</b>&nbsp;&nbsp;${row.D}</span>`
-                    )
-                )
-
+                .label(0, `A. ${row.A}`)
+                .label(1, `B. ${row.B}`)
+                .label(2, `C. ${row.C}`)
+                .label(3, `D. ${row.D}`)
                 .radio()
                 .vertical()
                 .labelsPosition("right")
                 .center()
-
                 .cssContainer({
                     "width": "850px",
                     "font-size": "1.2em",
                     "line-height": "2",
                     "margin": "0 auto"
                 })
-
                 .log("last")
                 .print(),
-
-
-            // ------------------------------------------------
-            // Warning
-            // ------------------------------------------------
 
             newText(
                 "proficiency_warning",
@@ -1158,18 +1704,9 @@ Template(
             )
                 .color("red")
                 .center()
-                .css({
-                    "font-size": "1.1em",
-                    "font-weight": "bold",
-                    "margin-top": "25px"
-                })
+                .css(warningStyle)
                 .hidden()
                 .print(),
-
-
-            // ------------------------------------------------
-            // Continue
-            // ------------------------------------------------
 
             newButton(
                 "proficiency_continue",
@@ -1188,13 +1725,12 @@ Template(
                 )
         )
 
-        // Proficiency information saved in the results
         .log("Question", row.Question)
         .log("OptionA", row.A)
         .log("OptionB", row.B)
         .log("OptionC", row.C)
         .log("OptionD", row.D)
-        .log("CorrectAnswer", row["Correct answer"])
+        .log("CorrectAnswer", correctAnswer)
         .log("CorrectKey", correctKey)
         .log("Level", row.Level);
     }
@@ -1202,7 +1738,7 @@ Template(
 
 
 // ============================================================
-// 16. PROLIFIC ID
+// 20. PROLIFIC ID
 // ============================================================
 
 newTrial("prolific_id",
@@ -1234,6 +1770,7 @@ newTrial("prolific_id",
         .lines(1)
         .size(450, 45)
         .center()
+        .css(inputStyle)
         .log()
         .print(),
 
@@ -1243,11 +1780,7 @@ newTrial("prolific_id",
     )
         .color("red")
         .center()
-        .css({
-            "font-size": "1.1em",
-            "font-weight": "bold",
-            "margin-top": "20px"
-        })
+        .css(warningStyle)
         .hidden()
         .print(),
 
@@ -1270,14 +1803,14 @@ newTrial("prolific_id",
 
 
 // ============================================================
-// 17. SEND RESULTS
+// 21. SEND RESULTS
 // ============================================================
 
 SendResults("send_results");
 
 
 // ============================================================
-// 18. COMPLETION SCREEN
+// 22. COMPLETION SCREEN
 // ============================================================
 
 newTrial("completion",
@@ -1287,7 +1820,7 @@ newTrial("completion",
         `
         Vielen Dank für Ihre Teilnahme!
         <br><br>
-        Alle Teile des Experiments sind abgeschlossen.
+        Alle Teile des Experiments sind nun abgeschlossen.
         Sie können diesen Tab nun schließen.
         `
     )
@@ -1302,7 +1835,6 @@ newTrial("completion",
         })
         .print(),
 
-    // Keep the final page visible
     newButton("void")
         .wait()
 );
